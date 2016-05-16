@@ -20,7 +20,6 @@ class DmozSpider(scrapy.Spider):
             print i, cate_num[index], cate_url[index]
             r = Request(cate_url[index], callback=self.parse_cate)
             req.append(r)
-            break
         return req
 
     def parse_cate(self, response):
@@ -32,7 +31,6 @@ class DmozSpider(scrapy.Spider):
             print i, cate_child_num[index], cate_child_url[index]
             r = Request(cate_child_url[index], callback=self.parse_list)
             req.append(r)
-            break
         return req
 
     def parse_list(self, response):
@@ -40,7 +38,7 @@ class DmozSpider(scrapy.Spider):
         products_name = response.xpath('//li[@class="s-result-item celwidget"]//h2/text()').extract()
         products_price = response.xpath('//span[@class="a-size-base a-color-price s-price a-text-bold"]/text()').extract()
         products_author = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/div/span[2]/text()').extract()
-        products_date = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/span[3]/text()').extract()
+        products_public_date = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/span[3]/text()').extract()
         products_comment_num = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]/div/a/text()').extract()
         products_stars = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]/div/span/span/a/i[1]/span/text()').extract()
         products_book_ids = response.xpath('//li[@class="s-result-item celwidget"]/@data-asin').extract()
@@ -48,22 +46,23 @@ class DmozSpider(scrapy.Spider):
         # rule the data
         products_price = [float(i[1:]) for i in products_price]
         products_comment_num = [int(''.join(i.split(','))) for i in products_comment_num]
-        products_stars = [float(i.split(' ')[0][2]) for i in products_stars]
+        products_stars = [float(i.split(' ')[0][2:]) for i in products_stars]
 
 
-        for name, price, author, date, comment_num, star, book_id in zip(products_name, products_price, products_author, products_date, products_comment_num, products_stars, products_book_ids):
-            print book_id, name, price, author, date, comment_num, star
+        for name, price, author, public_date, comment_num, star, book_id in zip(products_name, products_price, products_author, products_public_date, products_comment_num, products_stars, products_book_ids):
+            print book_id, name, price, author, public_date, comment_num, star
             # save item
             item = AmazonCrawlItem()
             item['name'] = name
             item['price'] = price
             item['author']= author
-            item['date'] = date
+            item['public_date'] = public_date
             item['comment_num'] = comment_num
             item['star'] = star
             item['book_id'] = book_id
+            yield item
 
         next_page = response.xpath('//*[@id="pagnNextLink"]/@href').extract()
         if next_page:
-            return [Request('https://www.amazon.cn' + next_page[0], callback=self.parse_list)]
+            yield Request('https://www.amazon.cn' + next_page[0], callback=self.parse_list)
 

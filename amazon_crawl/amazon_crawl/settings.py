@@ -14,6 +14,14 @@ BOT_NAME = 'amazon_crawl'
 SPIDER_MODULES = ['amazon_crawl.spiders']
 NEWSPIDER_MODULE = 'amazon_crawl.spiders'
 
+DATABASE = {
+    'drivername': 'postgres',
+    'host': 'localhost',
+    'port': '5432',
+    'username': 'limbo',
+    'password': '',
+    'database': 'amazon'
+}
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 #USER_AGENT = 'amazon_crawl (+http://www.yourdomain.com)'
@@ -61,9 +69,9 @@ NEWSPIDER_MODULE = 'amazon_crawl.spiders'
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'amazon_crawl.pipelines.SomePipeline': 300,
-#}
+ITEM_PIPELINES = {
+   'amazon_crawl.pipelines.AmazonCrawlPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
