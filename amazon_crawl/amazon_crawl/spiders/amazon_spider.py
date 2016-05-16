@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapy import Request
-from scrapy import Selector
+from amazon_crawl.items import AmazonCrawlItem
 
 class DmozSpider(scrapy.Spider):
     name = "amazon"
@@ -40,9 +40,29 @@ class DmozSpider(scrapy.Spider):
         products_name = response.xpath('//li[@class="s-result-item celwidget"]//h2/text()').extract()
         products_price = response.xpath('//span[@class="a-size-base a-color-price s-price a-text-bold"]/text()').extract()
         products_author = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/div/span[2]/text()').extract()
-        products_data = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/span[3]/text()').extract()
-        for name, price, author, data in zip(products_name, products_price, products_author, products_data):
-            print name, price, author, data
+        products_date = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/span[3]/text()').extract()
+        products_comment_num = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]/div/a/text()').extract()
+        products_stars = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]/div/span/span/a/i[1]/span/text()').extract()
+        products_book_ids = response.xpath('//li[@class="s-result-item celwidget"]/@data-asin').extract()
+
+        # rule the data
+        products_price = [float(i[1:]) for i in products_price]
+        products_comment_num = [int(''.join(i.split(','))) for i in products_comment_num]
+        products_stars = [float(i.split(' ')[0][2]) for i in products_stars]
+
+
+        for name, price, author, date, comment_num, star, book_id in zip(products_name, products_price, products_author, products_date, products_comment_num, products_stars, products_book_ids):
+            print book_id, name, price, author, date, comment_num, star
+            # save item
+            item = AmazonCrawlItem()
+            item['name'] = name
+            item['price'] = price
+            item['author']= author
+            item['date'] = date
+            item['comment_num'] = comment_num
+            item['star'] = star
+            item['book_id'] = book_id
+
         next_page = response.xpath('//*[@id="pagnNextLink"]/@href').extract()
         if next_page:
             return [Request('https://www.amazon.cn' + next_page[0], callback=self.parse_list)]

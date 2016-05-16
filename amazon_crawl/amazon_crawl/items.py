@@ -11,8 +11,10 @@ import scrapy
 class AmazonCrawlItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
-    title = scrapy.Field()
-    link = scrapy.Field()
+    name = scrapy.Field()
     price = scrapy.Field()
-    time = scrapy.Field()
+    author = scrapy.Field()
+    date = scrapy.Field()
+    comment_num = scrapy.Field()
+    star = scrapy.Field()
     book_id = scrapy.Field()
