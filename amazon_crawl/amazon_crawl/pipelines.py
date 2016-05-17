@@ -7,6 +7,7 @@
 
 from sqlalchemy.orm import sessionmaker
 from models import Books, Info, db_connect, create_table
+from scrapy.exceptions import DropItem
 
 class AmazonCrawlPipeline(object):
     def __init__(self):
@@ -25,9 +26,10 @@ class AmazonCrawlPipeline(object):
                     comment_num=item['comment_num'],
                     star=item['star'])
 
+        session.add(info)
+        session.commit()
         try:
             session.add(book)
-            session.add(info)
             session.commit()
         except:
             session.rollback()
@@ -36,3 +38,16 @@ class AmazonCrawlPipeline(object):
             session.close()
 
         return item
+
+
+class DuplicatesPipeline(object):
+
+    def __init__(self):
+        self.ids_seen = set()
+
+    def process_item(self, item, spider):
+        if item['book_id'] in self.ids_seen:
+            raise DropItem("Duplicate item found: %s" % item)
+        else:
+            self.ids_seen.add(item['book_id'])
+            return item

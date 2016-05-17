@@ -70,6 +70,7 @@ DATABASE = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
+   'amazon_crawl.pipelines.DuplicatesPipeline':200,
    'amazon_crawl.pipelines.AmazonCrawlPipeline': 300,
 }
 

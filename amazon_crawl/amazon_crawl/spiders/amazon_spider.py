@@ -36,16 +36,28 @@ class DmozSpider(scrapy.Spider):
     def parse_list(self, response):
         req = []
         products_name = response.xpath('//li[@class="s-result-item celwidget"]//h2/text()').extract()
-        products_price = response.xpath('//span[@class="a-size-base a-color-price s-price a-text-bold"]/text()').extract()
+        products_price = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[1]/div[last()-1]/a/span[1]/text()').extract()
         products_author = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/div/span[2]/text()').extract()
         products_public_date = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[2]/span[3]/text()').extract()
-        products_comment_num = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]/div/a/text()').extract()
-        products_stars = response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]/div/span/span/a/i[1]/span/text()').extract()
+
+        products_comment_num = []
+        for i in response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]'):
+            tmp = i.xpath('div/a/text()').extract()
+            if tmp:
+                products_comment_num.append(int(''.join(tmp[0].split(','))))
+            else:
+                products_comment_num.append(0)
+        products_stars = []
+        for i in response.xpath('//li[@class="s-result-item celwidget"]/div/div/div/div[2]/div[3]/div[2]'):
+            tmp = i.xpath('div/span/span/a/i[1]/span/text()').extract()
+            if tmp:
+                products_stars.append(tmp[0])
+            else:
+                products_stars.append(u'平均0 分')
         products_book_ids = response.xpath('//li[@class="s-result-item celwidget"]/@data-asin').extract()
 
         # rule the data
-        products_price = [float(i[1:]) for i in products_price]
-        products_comment_num = [int(''.join(i.split(','))) for i in products_comment_num]
+        products_price = [float(''.join(i[1:].split(','))) for i in products_price]
         products_stars = [float(i.split(' ')[0][2:]) for i in products_stars]
 
 
