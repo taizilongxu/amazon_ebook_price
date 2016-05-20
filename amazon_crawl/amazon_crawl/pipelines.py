@@ -8,6 +8,8 @@
 from sqlalchemy.orm import sessionmaker
 from models import Books, Info, db_connect, create_table
 from scrapy.exceptions import DropItem
+from datetime import datetime, timedelta
+
 
 class AmazonCrawlPipeline(object):
     def __init__(self):
@@ -18,6 +20,7 @@ class AmazonCrawlPipeline(object):
     def process_item(self, item, spider):
         session = self.Session()
         book = Books(book_id=item['book_id'],
+                     tag=item['tag'],
                      name=item['name'],
                      author=item['author'],
                      public_date=item['public_date'])
@@ -26,10 +29,12 @@ class AmazonCrawlPipeline(object):
                     comment_num=item['comment_num'],
                     star=item['star'])
 
-        session.add(info)
-        session.commit()
+        if not session.query(Info).filter(book_id=item['book_id']).filter(cast(Info.create_date,Date) == datetime.date.today()).fisrt():
+            session.add(info)
+            session.commit()
         try:
-            session.add(book)
+            if not session.query(Books).filter_by(book_id=item['book_id']).first():
+                session.add(book)
             session.commit()
         except:
             session.rollback()

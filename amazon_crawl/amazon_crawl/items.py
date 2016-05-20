@@ -19,3 +19,4 @@ class AmazonCrawlItem(scrapy.Item):
     star = scrapy.Field()
     book_id = scrapy.Field()
     create_date = scrapy.Field()
+    tag = scrapy.Field()

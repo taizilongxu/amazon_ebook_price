@@ -16,7 +16,6 @@ def db_connect():
     Performs database connection using database settings from settings.py.
     Returns sqlalchemy engine instance
     """
-    print URL(**settings.DATABASE)
     return create_engine(URL(**settings.DATABASE))
 
 
@@ -30,6 +29,7 @@ class Books(DeclarativeBase):
     __tablename__ = "books"
 
     book_id = Column('book_id', String, primary_key=True)
+    tag = Column('tag', String)
     name = Column('name', String)
     author = Column('author', String)
     public_date = Column('public_date', String, nullable=True)
